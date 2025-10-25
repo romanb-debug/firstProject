@@ -44,10 +44,11 @@ fun main() {
 
     var currentPlayer = Player.X
 
-    println("Current player: X, enter 2 numbers as a position of new X or O")
-    println("For example ")
+    println("Enter 2 numbers as coordinates of new X or O")
+    println("For example 1 2")
 
     while (true) {
+        println("Current player is $currentPlayer")
         if (!scanner.hasNextLine()) return
         val input = scanner.nextLine().trim()
         val parts = input.split(" ").filter { it.isNotEmpty() }
