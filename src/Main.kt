@@ -1,12 +1,18 @@
 import java.util.Scanner
 
-fun printMatrix(cells: CharArray) {
+enum class Player(val symbol: Char) {
+    X('X'), O('O');
+
+    fun other() = if (this == X) O else X
+}
+
+fun printMatrix(cells: Array<Player?>) {
     println("---------")
     for (r in 0..2) {
         print("| ")
         for (c in 0..2) {
-            val ch = cells[r * 3 + c]
-            print(ch)
+            val cell = cells[r * 3 + c]
+            print(cell?.symbol ?: ' ')
             if (c < 2) print(' ')
         }
         println(" |")
@@ -14,27 +20,35 @@ fun printMatrix(cells: CharArray) {
     println("---------")
 }
 
-fun hasWinner(cells: CharArray, player: Char): Boolean {
-    val lines = arrayOf(
-        intArrayOf(0,1,2), intArrayOf(3,4,5), intArrayOf(6,7,8),
-        intArrayOf(0,3,6), intArrayOf(1,4,7), intArrayOf(2,5,8),
-        intArrayOf(0,4,8), intArrayOf(2,4,6)
-    )
+val lines = arrayOf(
+    intArrayOf(0,1,2), intArrayOf(3,4,5), intArrayOf(6,7,8),
+    intArrayOf(0,3,6), intArrayOf(1,4,7), intArrayOf(2,5,8),
+    intArrayOf(0,4,8), intArrayOf(2,4,6)
+)
+
+fun hasWinner(cells: Array<Player?>): Player? {
     for (line in lines) {
-        if (cells[line[0]] == player && cells[line[1]] == player && cells[line[2]] == player) return true
+        val a = cells[line[0]]
+        val b = cells[line[1]]
+        val c = cells[line[2]]
+        if (a != null && a == b && b == c) return a
     }
-    return false
+    return null
 }
 
 fun main() {
     val scanner = Scanner(System.`in`)
-    val cells = CharArray(9) { ' ' }
+    val cells: Array<Player?> = Array(9) { null }
 
     printMatrix(cells)
 
-    var currentPlayer = 'X'
+    var currentPlayer = Player.X
+
+    println("Enter 2 numbers as coordinates of new X or O")
+    println("For example 1 2")
 
     while (true) {
+        println("Current player is $currentPlayer")
         if (!scanner.hasNextLine()) return
         val input = scanner.nextLine().trim()
         val parts = input.split(" ").filter { it.isNotEmpty() }
@@ -65,7 +79,7 @@ fun main() {
         val c = col - 1
         val idx = r * 3 + c
 
-        if (cells[idx] != ' ') {
+        if (cells[idx] != null) {
             println("This cell is occupied! Choose another one!")
             continue
         }
@@ -73,16 +87,11 @@ fun main() {
         cells[idx] = currentPlayer
         printMatrix(cells)
 
-        val xWins = hasWinner(cells, 'X')
-        val oWins = hasWinner(cells, 'O')
-        val emptyCount = cells.count { it == ' ' }
+        val winner = hasWinner(cells)
+        val emptyCount = cells.count { it == null }
 
-        if (xWins) {
-            println("X wins")
-            return
-        }
-        if (oWins) {
-            println("O wins")
+        if (winner != null) {
+            println("${winner.symbol} wins")
             return
         }
         if (emptyCount == 0) {
@@ -90,6 +99,6 @@ fun main() {
             return
         }
 
-        currentPlayer = if (currentPlayer == 'X') 'O' else 'X'
+        currentPlayer = currentPlayer.other()
     }
 }
